@@ -22,10 +22,12 @@
     "url": "https://github.com/mathildebuenerd/music-emotion-classifier/issues"
   },
   "devDependencies": {
-    "parcel-plugin-json-url-loader": "^0.1.1"
+    "parcel-plugin-json-url-loader": "^0.1.1",
+    "typescript": "^3.0.1"
   },
   "homepage": "https://github.com/mathildebuenerd/music-emotion-classifier#readme",
   "dependencies": {
-    "data": "^0.6.1"
+    "data": "^0.6.1",
+    "parcel-bundler": "^1.9.7"
   }
 }

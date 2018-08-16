@@ -9,4 +9,4 @@
 //
 // import Classifier from "./classifier";
 //
-// new p5(Classifier);
+/ new p5(Classifier);

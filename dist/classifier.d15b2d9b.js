@@ -121,33 +121,40 @@ var __importStar = this && this.__importStar || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var dataset = __importStar(require("../data/Emotion_data.json"));
 var toClassify = __importStar(require("../toClassify/Emotion_features.json"));
-var data;
-var songsToClassify;
+var data = {};
+var songsToClassify = {};
 var featuresList = ["tempo", "total_beats", "average_beats", "chroma_stft_mean", "chroma_stft_std", "chroma_stft_var", "chroma_cq_mean", "chroma_cq_std", "chroma_cq_var", "chroma_cens_mean", "chroma_cens_std", "chroma_cens_var", "melspectrogram_mean", "melspectrogram_std", "melspectrogram_var", "mfcc_mean", "mfcc_std", "mfcc_var", "mfcc_delta_mean", "mfcc_delta_std", "mfcc_delta_var", "rmse_mean", "rmse_std", "rmse_var", "cent_mean", "cent_std", "cent_var", "spec_bw_mean", "spec_bw_std", "spec_bw_var", "contrast_mean", "contrast_std", "contrast_var", "rolloff_mean", "rolloff_std", "rolloff_var", "poly_mean", "poly_std", "poly_var", "tonnetz_mean", "tonnetz_std", "tonnetz_var", "zcr_mean", "zcr_std", "zcr_var", "harm_mean", "harm_std", "harm_var", "perc_mean", "perc_std", "perc_var", "frame_mean", "frame_std", "frame_var"];
 var featuresMinMax = [];
 setup();
 function setup() {
-    console.log("hello");
-    data = loadJSON(dataset, function () {
-        songsToClassify = loadJSON(toClassify, function () {
-            var songs = [];
-            for (var i = 0; i < featuresList.length; i++) {
-                getMinMaxValues(featuresList[i]);
-            }
-            console.log(featuresMinMax);
-        });
+    loadJSON(dataset.default).then(function (jsonDataset) {
+        data = JSON.parse(jsonDataset);
+        return loadJSON(toClassify.default);
+    }).then(function (jsonSongs) {
+        songsToClassify = JSON.parse(jsonSongs);
+        for (var i = 0; i < featuresList.length; i++) {
+            getMinMaxValues(featuresList[i]);
+        }
+        console.log(featuresMinMax);
+    }).catch(function (err) {
+        return console.log(err);
     });
 }
-function loadJSON(url, callback) {
-    var xobj = new XMLHttpRequest();
-    xobj.overrideMimeType("application/json");
-    xobj.open('GET', url, true);
-    xobj.onreadystatechange = function () {
-        if (xobj.readyState == 4 && xobj.status == "200") {
-            callback(xobj.responseText);
-        }
-    };
-    xobj.send(null);
+function loadJSON(url) {
+    return new Promise(function (resolve, reject) {
+        var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+        xobj.open('GET', url, true);
+        xobj.onreadystatechange = function () {
+            if (xobj.readyState == 4 && xobj.status == 200) {
+                resolve(xobj.responseText);
+            }
+        };
+        xobj.send(null);
+        xobj.onerror = function () {
+            return reject(xobj.statusText);
+        };
+    });
 }
 function getMinMaxValues(feature) {
     var maxValue = 0;
@@ -202,7 +209,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '59712' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '65346' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 

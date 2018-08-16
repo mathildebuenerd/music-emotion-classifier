@@ -4,8 +4,8 @@ import * as dataset from "../data/Emotion_data.json";
 import * as toClassify from "../toClassify/Emotion_features.json";
 
 // const Classifier = (p) => {
-let data;
-let songsToClassify;
+let data = {};
+let songsToClassify = {};
 const featuresList = [
     "tempo",
     "total_beats",
@@ -64,42 +64,45 @@ const featuresList = [
 ]; // all sound features, inputs
 let featuresMinMax = [];
 
-
 setup();
 
-function setup() {
-    console.log("hello");
+function setup(): void {
 
-    data = loadJSON(dataset, () => {
-        songsToClassify = loadJSON(toClassify, () => {
-            let songs = [];
+    loadJSON(dataset.default) // We have to use .default to load the url correctly with parcel
+        .then((jsonDataset) => {
+            data = JSON.parse(jsonDataset);
+            return loadJSON(toClassify.default);
+        })
+        .then((jsonSongs) => {
+            songsToClassify = JSON.parse(jsonSongs);
             for (let i=0; i<featuresList.length; i++) {
                 getMinMaxValues(featuresList[i]);
             }
             console.log(featuresMinMax);
-        });
+        })
+        .catch((err) => console.log(err));
+    // songsToClassify = loadJSON(toClassify, () => {
+
+}
+
+function loadJSON(url: string): Promise<any> {
+
+    return new Promise((resolve, reject) => {
+        let xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+        xobj.open('GET', url, true); // Replace 'my_data' with the path to your file
+        xobj.onreadystatechange = () => {
+            if (xobj.readyState == 4 && xobj.status == 200) {
+                resolve(xobj.responseText);
+            }
+        };
+        xobj.send(null);
+        xobj.onerror = () => reject(xobj.statusText);
     });
 
-
-
 }
 
-function loadJSON(url, callback) {
-
-    let xobj = new XMLHttpRequest();
-    xobj.overrideMimeType("application/json");
-    xobj.open('GET', url, true); // Replace 'my_data' with the path to your file
-    xobj.onreadystatechange = () => {
-        if (xobj.readyState == 4 && xobj.status == "200") {
-            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
-            callback(xobj.responseText);
-        }
-    };
-    xobj.send(null);
-}
-
-
-function getMinMaxValues(feature) {
+function getMinMaxValues(feature: string): void {
     let maxValue = 0;
     let minValue = 0;
     let counter = 0;

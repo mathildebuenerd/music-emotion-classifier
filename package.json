@@ -1,0 +1,31 @@
+{
+  "name": "music-emotion-classifier",
+  "version": "1.0.0",
+  "description": "tool for associating musics with emotions based on their features",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mathildebuenerd/music-emotion-classifier.git"
+  },
+  "keywords": [
+    "emotion",
+    "music",
+    "classifier"
+  ],
+  "author": "mathilde buenerd",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mathildebuenerd/music-emotion-classifier/issues"
+  },
+  "devDependencies": {
+    "parcel-plugin-json-url-loader": "^0.1.1"
+  },
+  "homepage": "https://github.com/mathildebuenerd/music-emotion-classifier#readme",
+  "dependencies": {
+    "data": "^0.6.1"
+  }
+}

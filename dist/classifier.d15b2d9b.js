@@ -104,9 +104,57 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   // Override the current require with this new one
   return newRequire;
 })({"data\\Emotion_data.json":[function(require,module,exports) {
-module.exports="/Emotion_data.e4259c96.json";
+module.exports="/eaee64a20c237b3beca96772e4259c96.json";
 },{}],"toClassify\\Emotion_features.json":[function(require,module,exports) {
 module.exports="/Emotion_features.09a2a8d7.json";
+},{}],"scripts\\ShapeData.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var ShapeData = function () {
+    function ShapeData() {}
+    ShapeData.prototype.makeDatasetForTensors = function (data) {
+        var dataInputs = [];
+        var dataOutputs = [];
+        for (var singleSong in data) {
+            var newArray = this.convertObjectToArray(data[singleSong]);
+            dataInputs.push(newArray[0]);
+            dataOutputs.push(newArray[1]);
+        }
+        return [dataInputs, dataOutputs];
+    };
+    ;
+    ShapeData.prototype.convertObjectToArray = function (data) {
+        var singleFeature = [];
+        for (var _i = 0, _a = Object.entries(data); _i < _a.length; _i++) {
+            var _b = _a[_i],
+                key = _b[0],
+                value = _b[1];
+            if (!Object.entries) Object.entries = function (obj) {
+                var ownProps = Object.keys(obj),
+                    i = ownProps.length,
+                    resArray = new Array(i);
+                while (i--) {
+                    resArray[i] = [ownProps[i], obj[ownProps[i]]];
+                }if (i < ownProps.length - 3) {
+                    return resArray;
+                }
+            };
+            singleFeature.push(value);
+        }
+        return [singleFeature.splice(4), singleFeature.splice(2, 1)];
+    };
+    ;
+    ShapeData.prototype.isIterable = function (obj) {
+        console.log(obj);
+        if (obj == null) {
+            return false;
+        }
+        return typeof obj[Symbol.iterator] === 'function';
+    };
+    return ShapeData;
+}();
+exports.ShapeData = ShapeData;
 },{}],"scripts\\classifier.ts":[function(require,module,exports) {
 'use strict';
 
@@ -121,14 +169,22 @@ var __importStar = this && this.__importStar || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var dataset = __importStar(require("../data/Emotion_data.json"));
 var toClassify = __importStar(require("../toClassify/Emotion_features.json"));
+var SD = __importStar(require("./ShapeData"));
+var ShapeData = new SD.ShapeData();
 var data = {};
 var songsToClassify = {};
+var dataInputs = [];
+var dataOutputs = [];
 var featuresList = ["tempo", "total_beats", "average_beats", "chroma_stft_mean", "chroma_stft_std", "chroma_stft_var", "chroma_cq_mean", "chroma_cq_std", "chroma_cq_var", "chroma_cens_mean", "chroma_cens_std", "chroma_cens_var", "melspectrogram_mean", "melspectrogram_std", "melspectrogram_var", "mfcc_mean", "mfcc_std", "mfcc_var", "mfcc_delta_mean", "mfcc_delta_std", "mfcc_delta_var", "rmse_mean", "rmse_std", "rmse_var", "cent_mean", "cent_std", "cent_var", "spec_bw_mean", "spec_bw_std", "spec_bw_var", "contrast_mean", "contrast_std", "contrast_var", "rolloff_mean", "rolloff_std", "rolloff_var", "poly_mean", "poly_std", "poly_var", "tonnetz_mean", "tonnetz_std", "tonnetz_var", "zcr_mean", "zcr_std", "zcr_var", "harm_mean", "harm_std", "harm_var", "perc_mean", "perc_std", "perc_var", "frame_mean", "frame_std", "frame_var"];
 var featuresMinMax = [];
 setup();
 function setup() {
     loadJSON(dataset.default).then(function (jsonDataset) {
         data = JSON.parse(jsonDataset);
+        var newData = ShapeData.makeDatasetForTensors(data);
+        dataInputs = newData[0];
+        dataOutputs = newData[1];
+        console.log(dataOutputs);
         return loadJSON(toClassify.default);
     }).then(function (jsonSongs) {
         songsToClassify = JSON.parse(jsonSongs);
@@ -139,6 +195,16 @@ function setup() {
     }).catch(function (err) {
         return console.log(err);
     });
+}
+function makeInputs() {
+    var features = [];
+    for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
+        var singleSong = data_1[_i];
+        for (var _a = 0, _b = data[singleSong]; _a < _b.length; _a++) {
+            var singleFeature = _b[_a];
+            console.log(data[singleSong][singleFeature]);
+        }
+    }
 }
 function loadJSON(url) {
     return new Promise(function (resolve, reject) {
@@ -180,7 +246,7 @@ function getMinMaxValues(feature) {
         "max": maxValue
     });
 }
-},{"../data/Emotion_data.json":"data\\Emotion_data.json","../toClassify/Emotion_features.json":"toClassify\\Emotion_features.json"}],"node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
+},{"../data/Emotion_data.json":"data\\Emotion_data.json","../toClassify/Emotion_features.json":"toClassify\\Emotion_features.json","./ShapeData":"scripts\\ShapeData.ts"}],"node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -209,7 +275,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '65346' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '52081' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 

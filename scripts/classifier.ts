@@ -1,11 +1,19 @@
 'use strict';
 
+// Import data
 import * as dataset from "../data/Emotion_data.json";
 import * as toClassify from "../toClassify/Emotion_features.json";
+
+// Import functions to convert data
+import * as SD from "./ShapeData";
+const ShapeData = new SD.ShapeData;
+
 
 // const Classifier = (p) => {
 let data = {};
 let songsToClassify = {};
+let dataInputs = []; // The output of dataInputs[0] is dataOutputs[0]
+let dataOutputs = []; // "relax", "sad", "happy"...
 const featuresList = [
     "tempo",
     "total_beats",
@@ -62,7 +70,7 @@ const featuresList = [
     "frame_std",
     "frame_var"
 ]; // all sound features, inputs
-let featuresMinMax = [];
+let featuresMinMax = []; // to store the min and max value used for normalizing the inputs
 
 setup();
 
@@ -71,6 +79,13 @@ function setup(): void {
     loadJSON(dataset.default) // We have to use .default to load the url correctly with parcel
         .then((jsonDataset) => {
             data = JSON.parse(jsonDataset);
+            // let test = isIterable(data);
+            // console.log(test);
+            let newData = ShapeData.makeDatasetForTensors(data);
+            dataInputs = newData[0];
+            dataOutputs = newData[1];
+            console.log(dataOutputs);
+            // makeInputs();
             return loadJSON(toClassify.default);
         })
         .then((jsonSongs) => {
@@ -83,6 +98,17 @@ function setup(): void {
         .catch((err) => console.log(err));
     // songsToClassify = loadJSON(toClassify, () => {
 
+}
+
+
+
+function makeInputs(): void {
+    let features = [];
+    for (let singleSong of data) {
+        for (let singleFeature of data[singleSong]) {
+            console.log(data[singleSong][singleFeature]);
+        }
+    }
 }
 
 function loadJSON(url: string): Promise<any> {

@@ -104,7 +104,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   // Override the current require with this new one
   return newRequire;
 })({"data\\Emotion_data.json":[function(require,module,exports) {
-module.exports="/eaee64a20c237b3beca96772e4259c96.json";
+module.exports="/Emotion_data.e4259c96.json";
 },{}],"toClassify\\Emotion_features.json":[function(require,module,exports) {
 module.exports="/Emotion_features.09a2a8d7.json";
 },{}],"scripts\\ShapeData.ts":[function(require,module,exports) {
@@ -112,7 +112,9 @@ module.exports="/Emotion_features.09a2a8d7.json";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var ShapeData = function () {
-    function ShapeData() {}
+    function ShapeData() {
+        this.featuresList = ["tempo", "total_beats", "average_beats", "chroma_stft_mean", "chroma_stft_std", "chroma_stft_var", "chroma_cq_mean", "chroma_cq_std", "chroma_cq_var", "chroma_cens_mean", "chroma_cens_std", "chroma_cens_var", "melspectrogram_mean", "melspectrogram_std", "melspectrogram_var", "mfcc_mean", "mfcc_std", "mfcc_var", "mfcc_delta_mean", "mfcc_delta_std", "mfcc_delta_var", "rmse_mean", "rmse_std", "rmse_var", "cent_mean", "cent_std", "cent_var", "spec_bw_mean", "spec_bw_std", "spec_bw_var", "contrast_mean", "contrast_std", "contrast_var", "rolloff_mean", "rolloff_std", "rolloff_var", "poly_mean", "poly_std", "poly_var", "tonnetz_mean", "tonnetz_std", "tonnetz_var", "zcr_mean", "zcr_std", "zcr_var", "harm_mean", "harm_std", "harm_var", "perc_mean", "perc_std", "perc_var", "frame_mean", "frame_std", "frame_var"];
+    }
     ShapeData.prototype.makeDatasetForTensors = function (data) {
         var dataInputs = [];
         var dataOutputs = [];
@@ -145,6 +147,53 @@ var ShapeData = function () {
         return [singleFeature.splice(4), singleFeature.splice(2, 1)];
     };
     ;
+    ShapeData.prototype.normalizeData = function (originalData, arrayLikeData, type) {
+        var normalizedData = [];
+        var featuresRange = this.getMinMaxValues(originalData);
+        if (type === "inputs") {
+            for (var song in arrayLikeData) {
+                var singleNormalizedData = [];
+                for (var i = 0; i < arrayLikeData[song].length; i++) {
+                    var norm = this.normalize(arrayLikeData[song][i], featuresRange[i].min, featuresRange[i].max);
+                    singleNormalizedData.push(norm);
+                }
+                normalizedData.push(singleNormalizedData);
+            }
+            return normalizedData;
+        }
+    };
+    ;
+    ShapeData.prototype.normalize = function (value, minValue, maxValue) {
+        return (value - minValue) / (maxValue - minValue);
+    };
+    ShapeData.prototype.getMinMaxValues = function (data) {
+        var featuresMinMax = [];
+        for (var i = 0; i < this.featuresList.length; i++) {
+            var maxValue = 0;
+            var minValue = 0;
+            var counter = 0;
+            for (var song in data) {
+                var value = data[song][this.featuresList[i]];
+                if (counter === 0) {
+                    maxValue = value;
+                    minValue = value;
+                }
+                if (value > maxValue) {
+                    maxValue = value;
+                }
+                if (value < minValue) {
+                    minValue = value;
+                }
+                counter++;
+            }
+            featuresMinMax.push({
+                "feature": this.featuresList[i],
+                "min": minValue,
+                "max": maxValue
+            });
+        }
+        return featuresMinMax;
+    };
     ShapeData.prototype.isIterable = function (obj) {
         console.log(obj);
         if (obj == null) {
@@ -175,8 +224,7 @@ var data = {};
 var songsToClassify = {};
 var dataInputs = [];
 var dataOutputs = [];
-var featuresList = ["tempo", "total_beats", "average_beats", "chroma_stft_mean", "chroma_stft_std", "chroma_stft_var", "chroma_cq_mean", "chroma_cq_std", "chroma_cq_var", "chroma_cens_mean", "chroma_cens_std", "chroma_cens_var", "melspectrogram_mean", "melspectrogram_std", "melspectrogram_var", "mfcc_mean", "mfcc_std", "mfcc_var", "mfcc_delta_mean", "mfcc_delta_std", "mfcc_delta_var", "rmse_mean", "rmse_std", "rmse_var", "cent_mean", "cent_std", "cent_var", "spec_bw_mean", "spec_bw_std", "spec_bw_var", "contrast_mean", "contrast_std", "contrast_var", "rolloff_mean", "rolloff_std", "rolloff_var", "poly_mean", "poly_std", "poly_var", "tonnetz_mean", "tonnetz_std", "tonnetz_var", "zcr_mean", "zcr_std", "zcr_var", "harm_mean", "harm_std", "harm_var", "perc_mean", "perc_std", "perc_var", "frame_mean", "frame_std", "frame_var"];
-var featuresMinMax = [];
+var normalizedData = [];
 setup();
 function setup() {
     loadJSON(dataset.default).then(function (jsonDataset) {
@@ -184,14 +232,10 @@ function setup() {
         var newData = ShapeData.makeDatasetForTensors(data);
         dataInputs = newData[0];
         dataOutputs = newData[1];
-        console.log(dataOutputs);
+        normalizedData = ShapeData.normalizeData(data, dataInputs, "inputs");
         return loadJSON(toClassify.default);
     }).then(function (jsonSongs) {
         songsToClassify = JSON.parse(jsonSongs);
-        for (var i = 0; i < featuresList.length; i++) {
-            getMinMaxValues(featuresList[i]);
-        }
-        console.log(featuresMinMax);
     }).catch(function (err) {
         return console.log(err);
     });
@@ -220,30 +264,6 @@ function loadJSON(url) {
         xobj.onerror = function () {
             return reject(xobj.statusText);
         };
-    });
-}
-function getMinMaxValues(feature) {
-    var maxValue = 0;
-    var minValue = 0;
-    var counter = 0;
-    for (var song in data) {
-        var value = data[song][feature];
-        if (counter === 0) {
-            maxValue = value;
-            minValue = value;
-        }
-        if (value > maxValue) {
-            maxValue = value;
-        }
-        if (value < minValue) {
-            minValue = value;
-        }
-        counter++;
-    }
-    featuresMinMax.push({
-        "feature": feature,
-        "min": minValue,
-        "max": maxValue
     });
 }
 },{"../data/Emotion_data.json":"data\\Emotion_data.json","../toClassify/Emotion_features.json":"toClassify\\Emotion_features.json","./ShapeData":"scripts\\ShapeData.ts"}],"node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
@@ -275,7 +295,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '52081' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '58940' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 

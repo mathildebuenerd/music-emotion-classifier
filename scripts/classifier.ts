@@ -14,63 +14,7 @@ let data = {};
 let songsToClassify = {};
 let dataInputs = []; // The output of dataInputs[0] is dataOutputs[0]
 let dataOutputs = []; // "relax", "sad", "happy"...
-const featuresList = [
-    "tempo",
-    "total_beats",
-    "average_beats",
-    "chroma_stft_mean",
-    "chroma_stft_std",
-    "chroma_stft_var",
-    "chroma_cq_mean",
-    "chroma_cq_std",
-    "chroma_cq_var",
-    "chroma_cens_mean",
-    "chroma_cens_std",
-    "chroma_cens_var",
-    "melspectrogram_mean",
-    "melspectrogram_std",
-    "melspectrogram_var",
-    "mfcc_mean",
-    "mfcc_std",
-    "mfcc_var",
-    "mfcc_delta_mean",
-    "mfcc_delta_std",
-    "mfcc_delta_var",
-    "rmse_mean",
-    "rmse_std",
-    "rmse_var",
-    "cent_mean",
-    "cent_std",
-    "cent_var",
-    "spec_bw_mean",
-    "spec_bw_std",
-    "spec_bw_var",
-    "contrast_mean",
-    "contrast_std",
-    "contrast_var",
-    "rolloff_mean",
-    "rolloff_std",
-    "rolloff_var",
-    "poly_mean",
-    "poly_std",
-    "poly_var",
-    "tonnetz_mean",
-    "tonnetz_std",
-    "tonnetz_var",
-    "zcr_mean",
-    "zcr_std",
-    "zcr_var",
-    "harm_mean",
-    "harm_std",
-    "harm_var",
-    "perc_mean",
-    "perc_std",
-    "perc_var",
-    "frame_mean",
-    "frame_std",
-    "frame_var"
-]; // all sound features, inputs
-let featuresMinMax = []; // to store the min and max value used for normalizing the inputs
+let normalizedData = [];
 
 setup();
 
@@ -84,16 +28,17 @@ function setup(): void {
             let newData = ShapeData.makeDatasetForTensors(data);
             dataInputs = newData[0];
             dataOutputs = newData[1];
-            console.log(dataOutputs);
+            // console.log(dataOutputs);
+            normalizedData = ShapeData.normalizeData(data, dataInputs, "inputs");
             // makeInputs();
             return loadJSON(toClassify.default);
         })
         .then((jsonSongs) => {
             songsToClassify = JSON.parse(jsonSongs);
-            for (let i=0; i<featuresList.length; i++) {
-                getMinMaxValues(featuresList[i]);
-            }
-            console.log(featuresMinMax);
+            // for (let i=0; i<featuresList.length; i++) {
+            //     getMinMaxValues(featuresList[i]);
+            // }
+            // console.log(featuresMinMax);
         })
         .catch((err) => console.log(err));
     // songsToClassify = loadJSON(toClassify, () => {
@@ -128,32 +73,7 @@ function loadJSON(url: string): Promise<any> {
 
 }
 
-function getMinMaxValues(feature: string): void {
-    let maxValue = 0;
-    let minValue = 0;
-    let counter = 0;
 
-    for (const song in data) {
-        let value = data[song][feature];
-        if (counter === 0) {
-            maxValue = value;
-            minValue = value;
-        }
-        if (value > maxValue) {
-            maxValue = value;
-        }
-        if (value < minValue) {
-            minValue = value;
-        }
-        counter++;
-    }
-
-    featuresMinMax.push({
-        "feature": feature,
-        "min": minValue,
-        "max": maxValue
-    });
-}
 
 
 

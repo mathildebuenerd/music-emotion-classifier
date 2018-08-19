@@ -65,8 +65,10 @@ export class ShapeData {
         let dataOutputs = [];
         for (const singleSong in data) {
             let newArray = this.convertObjectToArray(data[singleSong]);
-            dataInputs.push(newArray[0]);
-            dataOutputs.push(newArray[1]);
+            const input = newArray.splice(4); // all the features
+            const output = newArray.splice(2, 1); // the label like "relax" or "happy"
+            dataInputs.push(input);
+            dataOutputs.push(output);
         }
         return [
             dataInputs,
@@ -74,9 +76,34 @@ export class ShapeData {
         ];
     };
 
+    makeUnclassifiedSongsForTensors(songsToClassify: object) {
+        let enumFeatures = this.convertObjectToArray(songsToClassify);
+        let numberOfSongs = Object.keys(enumFeatures[0]).length;
+        let songNames = [];
+        let allFeatures = [];
+        for (let i=1; i<numberOfSongs+1; i++) {
+            let songName = "";
+            let singleSongFeatures = [];
+            for (let j=0; j<enumFeatures.length; j++) {
+                if (j === 0) {
+                    songName = enumFeatures[j][i];
+                } else {
+                    singleSongFeatures.push(enumFeatures[j][i]);
+                }
+            }
+            songNames.push(songName);
+            allFeatures.push(singleSongFeatures);
+        }
+
+        return [
+            songNames,
+            allFeatures
+        ];
+    }
+
     convertObjectToArray(data: object): Array<Array<any>> {
         // Converts the object to an iterable object
-        let singleFeature = [];
+        let newArray = [];
         for(let [key, value] of Object.entries(data)) {
             if (!Object.entries)
                 Object.entries = function( obj ){
@@ -89,19 +116,16 @@ export class ShapeData {
                         return resArray;
                     }
                 };
-            singleFeature.push(value); // add each feature to an array
+            newArray.push(value); // add each feature to an array
             // console.log(key, value); // "first", "one"
         }
         // Returns an array with
         // [0] List of features
         // [1] Label ("relax", "calm"...)
-        return [
-            singleFeature.splice(4), // I splice the array because the first values are id, song_name, class and label
-            singleFeature.splice(2, 1)
-        ]
+        return newArray;
     };
 
-    normalizeData(originalData: object, arrayLikeData: object, type: string): Array<Array<number>> {
+    normalizeData(originalData: object, arrayLikeData: object): Array<Array<number>> {
 
         // console.log(originalData);
 
@@ -119,17 +143,16 @@ export class ShapeData {
         let featuresRange = this.getMinMaxValues(originalData);
         // console.log(featuresRange);
 
-        if (type === "inputs") {
-            for (const song in arrayLikeData) {
-                let singleNormalizedData = [];
-                for (let i=0; i<arrayLikeData[song].length; i++) {
-                    let norm = this.normalize(arrayLikeData[song][i], featuresRange[i].min, featuresRange[i].max);
-                    singleNormalizedData.push(norm);
-                }
-                normalizedData.push(singleNormalizedData);
+        for (const song in arrayLikeData) {
+            let singleNormalizedData = [];
+            for (let i=0; i<arrayLikeData[song].length; i++) {
+                let norm = this.normalize(arrayLikeData[song][i], featuresRange[i].min, featuresRange[i].max);
+                singleNormalizedData.push(norm);
             }
-            return normalizedData;
+            normalizedData.push(singleNormalizedData);
         }
+        return normalizedData;
+
 
     };
 

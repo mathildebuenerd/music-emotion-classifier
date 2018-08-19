@@ -120,14 +120,36 @@ var ShapeData = function () {
         var dataOutputs = [];
         for (var singleSong in data) {
             var newArray = this.convertObjectToArray(data[singleSong]);
-            dataInputs.push(newArray[0]);
-            dataOutputs.push(newArray[1]);
+            var input = newArray.splice(4);
+            var output = newArray.splice(2, 1);
+            dataInputs.push(input);
+            dataOutputs.push(output);
         }
         return [dataInputs, dataOutputs];
     };
     ;
+    ShapeData.prototype.makeUnclassifiedSongsForTensors = function (songsToClassify) {
+        var enumFeatures = this.convertObjectToArray(songsToClassify);
+        var numberOfSongs = Object.keys(enumFeatures[0]).length;
+        var songNames = [];
+        var allFeatures = [];
+        for (var i = 1; i < numberOfSongs + 1; i++) {
+            var songName = "";
+            var singleSongFeatures = [];
+            for (var j = 0; j < enumFeatures.length; j++) {
+                if (j === 0) {
+                    songName = enumFeatures[j][i];
+                } else {
+                    singleSongFeatures.push(enumFeatures[j][i]);
+                }
+            }
+            songNames.push(songName);
+            allFeatures.push(singleSongFeatures);
+        }
+        return [songNames, allFeatures];
+    };
     ShapeData.prototype.convertObjectToArray = function (data) {
-        var singleFeature = [];
+        var newArray = [];
         for (var _i = 0, _a = Object.entries(data); _i < _a.length; _i++) {
             var _b = _a[_i],
                 key = _b[0],
@@ -142,25 +164,23 @@ var ShapeData = function () {
                     return resArray;
                 }
             };
-            singleFeature.push(value);
+            newArray.push(value);
         }
-        return [singleFeature.splice(4), singleFeature.splice(2, 1)];
+        return newArray;
     };
     ;
-    ShapeData.prototype.normalizeData = function (originalData, arrayLikeData, type) {
+    ShapeData.prototype.normalizeData = function (originalData, arrayLikeData) {
         var normalizedData = [];
         var featuresRange = this.getMinMaxValues(originalData);
-        if (type === "inputs") {
-            for (var song in arrayLikeData) {
-                var singleNormalizedData = [];
-                for (var i = 0; i < arrayLikeData[song].length; i++) {
-                    var norm = this.normalize(arrayLikeData[song][i], featuresRange[i].min, featuresRange[i].max);
-                    singleNormalizedData.push(norm);
-                }
-                normalizedData.push(singleNormalizedData);
+        for (var song in arrayLikeData) {
+            var singleNormalizedData = [];
+            for (var i = 0; i < arrayLikeData[song].length; i++) {
+                var norm = this.normalize(arrayLikeData[song][i], featuresRange[i].min, featuresRange[i].max);
+                singleNormalizedData.push(norm);
             }
-            return normalizedData;
+            normalizedData.push(singleNormalizedData);
         }
+        return normalizedData;
     };
     ;
     ShapeData.prototype.normalize = function (value, minValue, maxValue) {
@@ -207,6 +227,86 @@ exports.ShapeData = ShapeData;
 },{}],"scripts\\classifier.ts":[function(require,module,exports) {
 'use strict';
 
+var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) {
+            try {
+                step(generator.next(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function rejected(value) {
+            try {
+                step(generator["throw"](value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function step(result) {
+            result.done ? resolve(result.value) : new P(function (resolve) {
+                resolve(result.value);
+            }).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = this && this.__generator || function (thisArg, body) {
+    var _ = { label: 0, sent: function sent() {
+            if (t[0] & 1) throw t[1];return t[1];
+        }, trys: [], ops: [] },
+        f,
+        y,
+        t,
+        g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function () {
+        return this;
+    }), g;
+    function verb(n) {
+        return function (v) {
+            return step([n, v]);
+        };
+    }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) {
+            try {
+                if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+                if (y = 0, t) op = [op[0] & 2, t.value];
+                switch (op[0]) {
+                    case 0:case 1:
+                        t = op;break;
+                    case 4:
+                        _.label++;return { value: op[1], done: false };
+                    case 5:
+                        _.label++;y = op[1];op = [0];continue;
+                    case 7:
+                        op = _.ops.pop();_.trys.pop();continue;
+                    default:
+                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                            _ = 0;continue;
+                        }
+                        if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+                            _.label = op[1];break;
+                        }
+                        if (op[0] === 6 && _.label < t[1]) {
+                            _.label = t[1];t = op;break;
+                        }
+                        if (t && _.label < t[2]) {
+                            _.label = t[2];_.ops.push(op);break;
+                        }
+                        if (t[2]) _.ops.pop();
+                        _.trys.pop();continue;
+                }
+                op = body.call(thisArg, _);
+            } catch (e) {
+                op = [6, e];y = 0;
+            } finally {
+                f = t = 0;
+            }
+        }if (op[0] & 5) throw op[1];return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 var __importStar = this && this.__importStar || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -223,21 +323,82 @@ var ShapeData = new SD.ShapeData();
 var data = {};
 var songsToClassify = {};
 var dataInputs = [];
-var dataOutputs = [];
+var labelList = ["sad", "happy", "relax", "angry"];
+var labels = [];
 var normalizedData = [];
+var model;
 setup();
 function setup() {
     loadJSON(dataset.default).then(function (jsonDataset) {
         data = JSON.parse(jsonDataset);
-        var newData = ShapeData.makeDatasetForTensors(data);
-        dataInputs = newData[0];
-        dataOutputs = newData[1];
-        normalizedData = ShapeData.normalizeData(data, dataInputs, "inputs");
         return loadJSON(toClassify.default);
     }).then(function (jsonSongs) {
         songsToClassify = JSON.parse(jsonSongs);
+        var toClassify = ShapeData.makeUnclassifiedSongsForTensors(songsToClassify);
+        var songNames = toClassify[0];
+        var songFeatures = toClassify[1];
+        console.log(songFeatures);
+        var newData = ShapeData.makeDatasetForTensors(data);
+        dataInputs = newData[0];
+        var dataOutputs = newData[1];
+        for (var i = 0; i < dataOutputs.length; i++) {
+            labels.push(labelList.indexOf(dataOutputs[i][0]));
+        }
+        normalizedData = ShapeData.normalizeData(data, dataInputs);
+        var xs = tf.tensor2d(normalizedData);
+        var labelsTensor = tf.tensor1d(labels, "int32");
+        var ys = tf.oneHot(labelsTensor, labelList.length);
+        labelsTensor.dispose();
+        model = tf.sequential();
+        var hiddenLayer = tf.layers.dense({
+            units: 16,
+            activation: "sigmoid",
+            inputDim: 54
+        });
+        var outputLayer = tf.layers.dense({
+            units: 4,
+            activation: "softmax"
+        });
+        model.add(hiddenLayer);
+        model.add(outputLayer);
+        var learningRate = 0.2;
+        var myOptimizer = tf.train.sgd(learningRate);
+        model.compile({
+            optimizer: myOptimizer,
+            loss: "categoricalCrossentropy"
+        });
     }).catch(function (err) {
         return console.log(err);
+    });
+}
+function train(xs, ys) {
+    return __awaiter(this, void 0, void 0, function () {
+        var options;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    options = {
+                        epochs: 50,
+                        validationSplit: 0.1,
+                        shuffle: true,
+                        callbacks: {
+                            onTrainBegin: function onTrainBegin() {
+                                return console.log("training start");
+                            },
+                            onTrainEnd: function onTrainEnd() {
+                                return console.log("training complete");
+                            },
+                            onEpochEnd: function onEpochEnd(num, logs) {
+                                console.log("Epoch: " + num);
+                                console.log(logs);
+                            }
+                        }
+                    };
+                    return [4, model.fit(xs, ys, options)];
+                case 1:
+                    return [2, _a.sent()];
+            }
+        });
     });
 }
 function makeInputs() {

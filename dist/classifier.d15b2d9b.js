@@ -337,7 +337,6 @@ function setup() {
         var toClassify = ShapeData.makeUnclassifiedSongsForTensors(songsToClassify);
         var songNames = toClassify[0];
         var songFeatures = toClassify[1];
-        console.log(songFeatures);
         var newData = ShapeData.makeDatasetForTensors(data);
         dataInputs = newData[0];
         var dataOutputs = newData[1];
@@ -351,7 +350,7 @@ function setup() {
         labelsTensor.dispose();
         model = tf.sequential();
         var hiddenLayer = tf.layers.dense({
-            units: 16,
+            units: 32,
             activation: "sigmoid",
             inputDim: 54
         });
@@ -361,11 +360,20 @@ function setup() {
         });
         model.add(hiddenLayer);
         model.add(outputLayer);
-        var learningRate = 0.2;
+        var learningRate = 0.02;
         var myOptimizer = tf.train.sgd(learningRate);
         model.compile({
             optimizer: myOptimizer,
             loss: "categoricalCrossentropy"
+        });
+        train(xs, ys).then(function (result) {
+            var indexToGuess = 4;
+            var toGuess = tf.tensor2d([songFeatures[indexToGuess]]);
+            var results = model.predict(toGuess);
+            var index = results.argMax(1).dataSync()[0];
+            var label = labelList[index];
+            console.log(songNames[indexToGuess]);
+            console.log(label);
         });
     }).catch(function (err) {
         return console.log(err);
@@ -378,7 +386,7 @@ function train(xs, ys) {
             switch (_a.label) {
                 case 0:
                     options = {
-                        epochs: 50,
+                        epochs: 100,
                         validationSplit: 0.1,
                         shuffle: true,
                         callbacks: {

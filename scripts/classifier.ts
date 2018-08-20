@@ -30,9 +30,7 @@ function setup(): void {
             // console.log(test);
 
 
-            // train(xs, ys).then( (result) => {
-            //     console.log(result);
-            // });
+
 
             // console.log(xs.shape);
             // console.log(xs);
@@ -45,7 +43,7 @@ function setup(): void {
             let toClassify = ShapeData.makeUnclassifiedSongsForTensors(songsToClassify);
             let songNames = toClassify[0];
             let songFeatures = toClassify[1];
-            console.log(songFeatures);
+            // console.log(songFeatures[0]);
 
             // ---|-- Building the model ------|-----
             // ---v----------------------------v-----
@@ -72,7 +70,7 @@ function setup(): void {
 
             model = tf.sequential();
             let hiddenLayer = tf.layers.dense({
-                units: 16,
+                units: 32,
                 activation: "sigmoid",
                 inputDim: 54
             });
@@ -84,13 +82,25 @@ function setup(): void {
             model.add(outputLayer);
 
             // Create an optimizer
-            const learningRate = 0.2;
+            const learningRate = 0.02;
             const myOptimizer = tf.train.sgd(learningRate);
 
             model.compile({
                 optimizer: myOptimizer,
                 loss: "categoricalCrossentropy"
             });
+
+            train(xs, ys).then( (result) => {
+                // console.log(result);
+                const indexToGuess = 4;
+                const toGuess = tf.tensor2d([songFeatures[indexToGuess]]);
+                let results = model.predict(toGuess);
+                let index = results.argMax(1).dataSync()[0];
+                let label = labelList[index];
+                console.log(songNames[indexToGuess]);
+                console.log(label);
+            });
+
 
         })
         .catch((err) => console.log(err));
@@ -101,7 +111,7 @@ function setup(): void {
 async function train(xs, ys) {
 
     const options = {
-        epochs: 50, // number of times it iterates over training data
+        epochs: 100, // number of times it iterates over training data
         validationSplit: 0.1,
         shuffle: true,
         callbacks: {

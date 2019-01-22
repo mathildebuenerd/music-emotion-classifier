@@ -43,7 +43,7 @@ function classify(options = {
     unitsHiddenLayer: 50,
     hiddenLayerActivation: "relu",
     outputLayerActivation: "softmax",
-}) {
+}): void {
 
 
     const epochs = options.epochs;
@@ -124,26 +124,27 @@ function classify(options = {
                 // console.log(result);
                 tf.tidy( () => {
 
+                    // Array to store the results
+                    let classifiedSongs = [];
+
+                    // Loop through all songs
                     for (const song in songFeatures) {
-                        // toGuess = input
-                        const toGuess = tf.tensor2d([songFeatures[song]]);
-                        // console.log(`song features:`, songFeatures[song]);
+                        const toGuess = tf.tensor2d([songFeatures[song]]); // toGuess = input
                         let results = model.predict(toGuess);
                         let argMax = results.argMax(1);
                         let index = argMax.dataSync()[0];
                         let label = labelList[index];
                         model.getWeights();
+                        classifiedSongs.push({
+                            songName: songNames[song],
+                            label: label,
+                            labelIndex: index
+                        });
                         console.log(`I think that ${songNames[song]} is a ${label} song`);
                     }
 
-                    // const indexToGuess = 4;
-                    // const toGuess = tf.tensor2d([songFeatures[indexToGuess]]);
-                    // let results = model.predict(toGuess);
-                    // let index = results.argMax(1).dataSync()[0];
-                    // let label = labelList[index];
-                    // model.getWeights();
-                    // console.log(songNames[indexToGuess]);
-                    // console.log(label);
+                //    shows the final results
+                    console.log(`Classified songs:`, classifiedSongs);
                 });
 
             });

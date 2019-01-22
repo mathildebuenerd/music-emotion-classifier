@@ -417,6 +417,7 @@ function classify(options) {
         });
         train(xs, ys).then(function (result) {
             tf.tidy(function () {
+                var classifiedSongs = [];
                 for (var song in songFeatures) {
                     var toGuess = tf.tensor2d([songFeatures[song]]);
                     var results = model.predict(toGuess);
@@ -424,8 +425,14 @@ function classify(options) {
                     var index = argMax.dataSync()[0];
                     var label = labelList[index];
                     model.getWeights();
+                    classifiedSongs.push({
+                        songName: songNames[song],
+                        label: label,
+                        labelIndex: index
+                    });
                     console.log("I think that " + songNames[song] + " is a " + label + " song");
                 }
+                console.log("Classified songs:", classifiedSongs);
             });
         });
     }).catch(function (err) {

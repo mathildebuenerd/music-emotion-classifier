@@ -5,6 +5,8 @@ Classifies musics and sounds into 4 emotions: happy, calm, angry or sad, dependi
 
 The classification is based on [a dataset of already classified sounds](https://github.com/danz1ka19/Music-Emotion-Recognition/blob/master/Emotion_features.csv) by danz1ka19.
 
+![Vue de l'interface](https://ibb.co/yshTfZf)
+
 ## Usage
 
 ### 1. Extract the features of your sound files
@@ -20,6 +22,7 @@ py Feature-Extraction.py
 
 ### 2. Add the sound features
 - Download this repo.
+- Run `npm install`.
 - Place the generated `Emotion_features.json` file in the `toClassify` folder.
 
 ### 3. Tune the model
@@ -27,8 +30,8 @@ py Feature-Extraction.py
 
 ### 4. Run 
 - Run with using `npm start` at the root of the project.
-- You can access the results in the console at `http://localhost:1234`
-- You can also tune the model here, by entering your own parameters and pressing the "Classify" button. There is not checking for the values entered here so
+- You can access the results in the console at `http://localhost:1234`, with Google Chrome.
+- You can also tune the model here, by entering your own parameters and pressing the "Classify" button. There is no checking for the values entered here so be careful.
 - The results will appear in the console.
 
 

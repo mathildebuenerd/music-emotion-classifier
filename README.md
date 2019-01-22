@@ -27,8 +27,8 @@ py Feature-Extraction.py
 
 ### 4. Run 
 - Run with using `npm start` at the root of the project.
-- You can access the results at `http://localhost:1234`
-- You can also tune the model here, by entering your own parameters and pressing the "Classify" button.
+- You can access the results in the console at `http://localhost:1234`
+- You can also tune the model here, by entering your own parameters and pressing the "Classify" button. There is not checking for the values entered here so
 - The results will appear in the console.
 
 

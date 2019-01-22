@@ -13,8 +13,9 @@
 
 <h1>Music Emotion Classifier</h1>
 
-<h2>Options</h2>
+<p>Watch the results in the console</p>
 
+<h2>Model options</h2>
 
 <section id="allOptions">
     <div class="inputData">
@@ -61,6 +62,25 @@
         <!--<p class="range"></p>-->
         <p class="defaultValue">Default: <span>softmax</span></p>
     </div>
+</section>
+
+<h2>Result options</h2>
+
+<section id="consoleOptions">
+
+    <p class="checkboxConsole">
+        <input type="checkbox" id="showEpochs" checked>
+        <label for="showEpochs"><span class="ui"></span>Epochs logs</label>
+    </p>
+    <p class="checkboxConsole">
+        <input type="checkbox" id="showFinalResult" checked>
+        <label for="showFinalResult"><span class="ui"></span>Final result</label>
+    </p>
+    <p class="checkboxConsole">
+        <input type="checkbox" id="showSingleResults" checked>
+        <label for="showSingleResults"><span class="ui"></span>Single results</label>
+    </p>
+
 </section>
 
 <button id="submit" type="submit">Classify</button>

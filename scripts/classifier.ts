@@ -24,34 +24,26 @@ document.querySelector(`#submit`).addEventListener('click', () => {
     const hiddenLayerActivation = String((<HTMLInputElement>document.querySelector(`#hiddenLayerActivation`)).value);
     const outputLayerActivation = String((<HTMLInputElement>document.querySelector(`#outputLayerActivation`)).value);
 
-    classify({
-        epochs: epochs,
-        learningRate: learningRate,
-        validationSplit: validationSplit,
-        unitsHiddenLayer: unitsHiddenLayer,
-        hiddenLayerActivation: hiddenLayerActivation,
-        outputLayerActivation: outputLayerActivation
-    });
+    classify(
+        epochs,
+        learningRate,
+        validationSplit,
+        unitsHiddenLayer,
+        hiddenLayerActivation,
+        outputLayerActivation
+    );
 });
 
 classify();
 
-function classify(options = {
-    epochs: 30,
-    learningRate: 0.3,
-    validationSplit: 0.2,
-    unitsHiddenLayer: 50,
-    hiddenLayerActivation: "relu",
-    outputLayerActivation: "softmax",
-}): void {
-
-
-    const epochs = options.epochs;
-    const learningRate = options.learningRate;
-    const validationSplit = options.validationSplit;
-    const unitsHiddenLayer = options.unitsHiddenLayer;
-    const hiddenLayerActivation = options.hiddenLayerActivation;
-    const outputLayerActivation = options.outputLayerActivation;
+function classify(
+    epochs: number = 30,
+    learningRate: number = 0.3,
+    validationSplit: number = 0.2,
+    unitsHiddenLayer: number = 50,
+    hiddenLayerActivation: string = "relu",
+    outputLayerActivation: string = "softmax",
+): void {
 
     let data = {};
     let songsToClassify = {};
@@ -140,11 +132,16 @@ function classify(options = {
                             label: label,
                             labelIndex: index
                         });
-                        console.log(`I think that ${songNames[song]} is a ${label} song`);
+
+                        if ((<HTMLInputElement>document.querySelector(`#showSingleResults`)).checked) {
+                            console.log(`I think that ${songNames[song]} is a ${label} song`);
+                        }
                     }
 
-                //    shows the final results
-                    console.log(`Classified songs:`, classifiedSongs);
+                    //    shows the final results
+                    if ((<HTMLInputElement>document.querySelector(`#showFinalResult`)).checked) {
+                        console.log(`Classified songs:`, classifiedSongs);
+                    }
                 });
 
             });
@@ -164,8 +161,11 @@ function classify(options = {
                 onTrainBegin: () => console.log("training start"),
                 onTrainEnd: () => console.log("training complete"),
                 onEpochEnd: (num, logs) => {
-                    console.log(`Epoch: ${num}`);
-                    console.log(logs);
+                    // Show epochs logs
+                    if ((<HTMLInputElement>document.querySelector(`#showEpochs`)).checked) {
+                        console.log(`Epoch: ${num}`);
+                        console.log(logs);
+                    }
                 }
             }
             // shuffle

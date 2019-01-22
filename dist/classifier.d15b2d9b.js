@@ -343,33 +343,28 @@ document.querySelector("#submit").addEventListener('click', function () {
     var unitsHiddenLayer = parseInt(document.querySelector("#epochs").value);
     var hiddenLayerActivation = String(document.querySelector("#hiddenLayerActivation").value);
     var outputLayerActivation = String(document.querySelector("#outputLayerActivation").value);
-    classify({
-        epochs: epochs,
-        learningRate: learningRate,
-        validationSplit: validationSplit,
-        unitsHiddenLayer: unitsHiddenLayer,
-        hiddenLayerActivation: hiddenLayerActivation,
-        outputLayerActivation: outputLayerActivation
-    });
+    classify(epochs, learningRate, validationSplit, unitsHiddenLayer, hiddenLayerActivation, outputLayerActivation);
 });
 classify();
-function classify(options) {
-    if (options === void 0) {
-        options = {
-            epochs: 30,
-            learningRate: 0.3,
-            validationSplit: 0.2,
-            unitsHiddenLayer: 50,
-            hiddenLayerActivation: "relu",
-            outputLayerActivation: "softmax"
-        };
+function classify(epochs, learningRate, validationSplit, unitsHiddenLayer, hiddenLayerActivation, outputLayerActivation) {
+    if (epochs === void 0) {
+        epochs = 30;
     }
-    var epochs = options.epochs;
-    var learningRate = options.learningRate;
-    var validationSplit = options.validationSplit;
-    var unitsHiddenLayer = options.unitsHiddenLayer;
-    var hiddenLayerActivation = options.hiddenLayerActivation;
-    var outputLayerActivation = options.outputLayerActivation;
+    if (learningRate === void 0) {
+        learningRate = 0.3;
+    }
+    if (validationSplit === void 0) {
+        validationSplit = 0.2;
+    }
+    if (unitsHiddenLayer === void 0) {
+        unitsHiddenLayer = 50;
+    }
+    if (hiddenLayerActivation === void 0) {
+        hiddenLayerActivation = "relu";
+    }
+    if (outputLayerActivation === void 0) {
+        outputLayerActivation = "softmax";
+    }
     var data = {};
     var songsToClassify = {};
     var dataInputs = [];
@@ -430,9 +425,13 @@ function classify(options) {
                         label: label,
                         labelIndex: index
                     });
-                    console.log("I think that " + songNames[song] + " is a " + label + " song");
+                    if (document.querySelector("#showSingleResults").checked) {
+                        console.log("I think that " + songNames[song] + " is a " + label + " song");
+                    }
                 }
-                console.log("Classified songs:", classifiedSongs);
+                if (document.querySelector("#showFinalResult").checked) {
+                    console.log("Classified songs:", classifiedSongs);
+                }
             });
         });
     }).catch(function (err) {
@@ -456,8 +455,10 @@ function classify(options) {
                                     return console.log("training complete");
                                 },
                                 onEpochEnd: function onEpochEnd(num, logs) {
-                                    console.log("Epoch: " + num);
-                                    console.log(logs);
+                                    if (document.querySelector("#showEpochs").checked) {
+                                        console.log("Epoch: " + num);
+                                        console.log(logs);
+                                    }
                                 }
                             }
                         };

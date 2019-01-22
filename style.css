@@ -1,0 +1,59 @@
+body {
+    margin: 0;
+    padding: 30px 50px;
+    font-family: Roboto, arial, sans-serif;
+    background-color: #efefef;
+}
+
+#allOptions {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    #allOptions {
+        flex-direction: column;
+    }
+
+    .inputData {
+        width: 80% !important;
+    }
+}
+.inputData {
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+    width: 25%;
+    box-shadow: 0 3px 5px #c4c4c4;
+}
+
+input {
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid lightgrey;
+    width: 80%;
+}
+
+button {
+    padding: 15px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background-color: #0085ff;
+    color: white;
+    border: 0;
+    box-shadow: 0 3px 5px #c4c4c4;
+}
+
+label {
+    font-weight: 700;
+}
+
+.defaultValue {
+    font-size: 0.9em;
+    font-style: italic;
+    color: #aaa;
+}
+.range::before {
+    content: "Value should be...";
+}

@@ -5,54 +5,63 @@
     <title>Music Emotion Classifier</title>
 
     <!-- Load Tensorflow.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.12.5"> </script>
-</head>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.12.5"></script>
+
+    <link rel="stylesheet" href="/style.88535697.css">
+<script src="/style.88535697.js"></script></head>
 <body>
 
 <h1>Music Emotion Classifier</h1>
 
 <h2>Options</h2>
 
-<div class="inputData">
-    <label for="epochs">epochs</label>
-    <input id="epochs" type="number" value="30">
-    <p class="range">Integer superior to 1</p>
-    <p class="defaultValue">Default: <span>30</span></p>
-</div>
 
-<div class="inputData">
-    <label for="learningRate">learningRate</label>
-    <input id="learningRate" type="number" value="0.3">
-    <p class="range">Float between 0 and 1</p>
-    <p class="defaultValue">Default: <span>0.3</span></p>
-</div>
+<section id="allOptions">
+    <div class="inputData">
+        <label for="epochs">epochs</label>
+        <div>
+            <input id="epochs" type="number" value="30">
+            <p class="range">Integer superior to 1</p>
+            <p class="defaultValue">Default: <span>30</span></p>
+        </div>
+    </div>
 
-<div class="inputData">
-    <label for="validationSplit">validationSplit</label>
-    <input id="validationSplit" type="number" value="0.2">
-    <p class="range">Float betwenn 0 and 1, usually around 0.15</p>
-    <p class="defaultValue">Default: <span>0.2</span></p>
-</div>
+    <div class="inputData">
+        <label for="learningRate">learningRate</label>
+        <div>
+            <input id="learningRate" type="number" value="0.3">
+            <p class="range">Float between 0 and 1</p>
+            <p class="defaultValue">Default: <span>0.3</span></p>
+        </div>
+    </div>
 
-<div class="inputData">
-    <label for="unitsHiddenLayer">unitsHiddenLayer</label>
-    <input id="unitsHiddenLayer" type="number" value="50">
-    <p class="range">Integer superior to 1</p>
-    <p class="defaultValue">Default: <span>50</span></p>
-</div>
+    <div class="inputData">
+        <label for="validationSplit">validationSplit</label>
+        <input id="validationSplit" type="number" value="0.2">
+        <p class="range">Float betwenn 0 and 1, usually around 0.15</p>
+        <p class="defaultValue">Default: <span>0.2</span></p>
+    </div>
 
-<div class="inputData">
-    <label for="hiddenLayerActivation">hiddenLayerActivation</label>
-    <input id="hiddenLayerActivation" type="text" value="relu">
-    <p class="defaultValue">Default: <span>relu</span></p>
-</div>
+    <div class="inputData">
+        <label for="unitsHiddenLayer">unitsHiddenLayer</label>
+        <input id="unitsHiddenLayer" type="number" value="50">
+        <p class="range">Integer superior to 1</p>
+        <p class="defaultValue">Default: <span>50</span></p>
+    </div>
 
-<div class="inputData">
-    <label for="outputLayerActivation">outputLayerActivation</label>
-    <input id="outputLayerActivation" type="text" value="softmax">
-    <!--<p class="range"></p>-->
-    <p class="defaultValue">Default: <span>softmax</span></p>
-</div>
+    <div class="inputData">
+        <label for="hiddenLayerActivation">hiddenLayerActivation</label>
+        <input id="hiddenLayerActivation" type="text" value="relu">
+        <p class="defaultValue">Default: <span>relu</span></p>
+    </div>
+
+    <div class="inputData">
+        <label for="outputLayerActivation">outputLayerActivation</label>
+        <input id="outputLayerActivation" type="text" value="softmax">
+        <!--<p class="range"></p>-->
+        <p class="defaultValue">Default: <span>softmax</span></p>
+    </div>
+</section>
 
 <button id="submit" type="submit">Classify</button>
 

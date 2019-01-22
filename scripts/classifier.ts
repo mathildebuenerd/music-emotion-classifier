@@ -1,12 +1,7 @@
 'use strict';
 
 // -------- Options --------
-const epochs = 30;
-const learningRate = 0.3;
-const validationSplit = 0.2;
-const unitsHiddenLayer = 50;
-const hiddenLayerActivation = "relu";
-const outputLayerActivation = "softmax";
+
 
 
 // Import data
@@ -17,20 +12,54 @@ import * as toClassify from "../toClassify/Emotion_features.json";
 import * as SD from "./ShapeData";
 const ShapeData = new SD.ShapeData;
 
-// const Classifier = (p) => {
-let data = {};
-let songsToClassify = {};
-let dataInputs = []; // The output of dataInputs[0] is dataOutputs[0]
+
 let labelList = ["sad", "happy", "relax", "angry"];
 
-let labels = []; // hot encoded values 0, 1, 2 or 3
-let normalizedData = [];
+document.querySelector(`#submit`).addEventListener('click', () => {
+    // Get the values from HTML
+    const epochs = parseInt((<HTMLInputElement>document.querySelector(`#epochs`)).value);
+    const learningRate = parseFloat((<HTMLInputElement>document.querySelector(`#learningRate`)).value);
+    const validationSplit = parseFloat((<HTMLInputElement>document.querySelector(`#validationSplit`)).value);
+    const unitsHiddenLayer = parseInt((<HTMLInputElement>document.querySelector(`#epochs`)).value);
+    const hiddenLayerActivation = String((<HTMLInputElement>document.querySelector(`#hiddenLayerActivation`)).value);
+    const outputLayerActivation = String((<HTMLInputElement>document.querySelector(`#outputLayerActivation`)).value);
 
-let model;
+    classify({
+        epochs: epochs,
+        learningRate: learningRate,
+        validationSplit: validationSplit,
+        unitsHiddenLayer: unitsHiddenLayer,
+        hiddenLayerActivation: hiddenLayerActivation,
+        outputLayerActivation: outputLayerActivation
+    });
+});
 
-setup();
+classify();
 
-function setup(): void {
+function classify(options = {
+    epochs: 30,
+    learningRate: 0.3,
+    validationSplit: 0.2,
+    unitsHiddenLayer: 50,
+    hiddenLayerActivation: "relu",
+    outputLayerActivation: "softmax",
+}) {
+
+
+    const epochs = options.epochs;
+    const learningRate = options.learningRate;
+    const validationSplit = options.validationSplit;
+    const unitsHiddenLayer = options.unitsHiddenLayer;
+    const hiddenLayerActivation = options.hiddenLayerActivation;
+    const outputLayerActivation = options.outputLayerActivation;
+
+    let data = {};
+    let songsToClassify = {};
+    let dataInputs = []; // The output of dataInputs[0] is dataOutputs[0]
+
+    let labels = []; // hot encoded values 0, 1, 2 or 3
+    let normalizedData = [];
+    let model;
 
     // We have to use .default to load the url correctly with parcel
     loadJSON(dataset.default)
@@ -124,55 +153,55 @@ function setup(): void {
         .catch((err) => console.log(err));
     // songsToClassify = loadJSON(toClassify, () => {
 
-}
+    async function train(xs, ys) {
 
-async function train(xs, ys) {
-
-    const options = {
-        epochs: epochs, // number of times it iterates over training data
-        validationSplit: validationSplit,
-        shuffle: true,
-        callbacks: {
-            onTrainBegin: () => console.log("training start"),
-            onTrainEnd: () => console.log("training complete"),
-            onEpochEnd: (num, logs) => {
-                console.log(`Epoch: ${num}`);
-                console.log(logs);
+        const options = {
+            epochs: epochs, // number of times it iterates over training data
+            validationSplit: validationSplit,
+            shuffle: true,
+            callbacks: {
+                onTrainBegin: () => console.log("training start"),
+                onTrainEnd: () => console.log("training complete"),
+                onEpochEnd: (num, logs) => {
+                    console.log(`Epoch: ${num}`);
+                    console.log(logs);
+                }
             }
-        }
-        // shuffle
-    };
+            // shuffle
+        };
 
-    return await model.fit(xs, ys, options);
-}
+        return await model.fit(xs, ys, options);
+    }
 
-
-
-function makeInputs(): void {
-    let features = [];
-    for (let singleSong of data) {
-        for (let singleFeature of data[singleSong]) {
-            console.log(data[singleSong][singleFeature]);
+    function makeInputs(): void {
+        let features = [];
+        for (let singleSong of data) {
+            for (let singleFeature of data[singleSong]) {
+                console.log(data[singleSong][singleFeature]);
+            }
         }
     }
+
+    function loadJSON(url: string): Promise<any> {
+
+        return new Promise((resolve, reject) => {
+            let xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', url, true); // Replace 'my_data' with the path to your file
+            xobj.onreadystatechange = () => {
+                if (xobj.readyState == 4 && xobj.status == 200) {
+                    resolve(xobj.responseText);
+                }
+            };
+            xobj.send(null);
+            xobj.onerror = () => reject(xobj.statusText);
+        });
+
+    }
+
+
 }
 
-function loadJSON(url: string): Promise<any> {
-
-    return new Promise((resolve, reject) => {
-        let xobj = new XMLHttpRequest();
-        xobj.overrideMimeType("application/json");
-        xobj.open('GET', url, true); // Replace 'my_data' with the path to your file
-        xobj.onreadystatechange = () => {
-            if (xobj.readyState == 4 && xobj.status == 200) {
-                resolve(xobj.responseText);
-            }
-        };
-        xobj.send(null);
-        xobj.onerror = () => reject(xobj.statusText);
-    });
-
-}
 
 
 

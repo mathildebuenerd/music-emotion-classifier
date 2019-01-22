@@ -331,25 +331,51 @@ var __importStar = this && this.__importStar || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var epochs = 30;
-var learningRate = 0.3;
-var validationSplit = 0.2;
-var unitsHiddenLayer = 50;
-var hiddenLayerActivation = "relu";
-var outputLayerActivation = "softmax";
 var dataset = __importStar(require("../data/Emotion_data.json"));
 var toClassify = __importStar(require("../toClassify/Emotion_features.json"));
 var SD = __importStar(require("./ShapeData"));
 var ShapeData = new SD.ShapeData();
-var data = {};
-var songsToClassify = {};
-var dataInputs = [];
 var labelList = ["sad", "happy", "relax", "angry"];
-var labels = [];
-var normalizedData = [];
-var model;
-setup();
-function setup() {
+document.querySelector("#submit").addEventListener('click', function () {
+    var epochs = parseInt(document.querySelector("#epochs").value);
+    var learningRate = parseFloat(document.querySelector("#learningRate").value);
+    var validationSplit = parseFloat(document.querySelector("#validationSplit").value);
+    var unitsHiddenLayer = parseInt(document.querySelector("#epochs").value);
+    var hiddenLayerActivation = String(document.querySelector("#hiddenLayerActivation").value);
+    var outputLayerActivation = String(document.querySelector("#outputLayerActivation").value);
+    classify({
+        epochs: epochs,
+        learningRate: learningRate,
+        validationSplit: validationSplit,
+        unitsHiddenLayer: unitsHiddenLayer,
+        hiddenLayerActivation: hiddenLayerActivation,
+        outputLayerActivation: outputLayerActivation
+    });
+});
+classify();
+function classify(options) {
+    if (options === void 0) {
+        options = {
+            epochs: 30,
+            learningRate: 0.3,
+            validationSplit: 0.2,
+            unitsHiddenLayer: 50,
+            hiddenLayerActivation: "relu",
+            outputLayerActivation: "softmax"
+        };
+    }
+    var epochs = options.epochs;
+    var learningRate = options.learningRate;
+    var validationSplit = options.validationSplit;
+    var unitsHiddenLayer = options.unitsHiddenLayer;
+    var hiddenLayerActivation = options.hiddenLayerActivation;
+    var outputLayerActivation = options.outputLayerActivation;
+    var data = {};
+    var songsToClassify = {};
+    var dataInputs = [];
+    var labels = [];
+    var normalizedData = [];
+    var model;
     loadJSON(dataset.default).then(function (jsonDataset) {
         data = JSON.parse(jsonDataset);
         return loadJSON(toClassify.default);
@@ -405,62 +431,62 @@ function setup() {
     }).catch(function (err) {
         return console.log(err);
     });
-}
-function train(xs, ys) {
-    return __awaiter(this, void 0, void 0, function () {
-        var options;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    options = {
-                        epochs: epochs,
-                        validationSplit: validationSplit,
-                        shuffle: true,
-                        callbacks: {
-                            onTrainBegin: function onTrainBegin() {
-                                return console.log("training start");
-                            },
-                            onTrainEnd: function onTrainEnd() {
-                                return console.log("training complete");
-                            },
-                            onEpochEnd: function onEpochEnd(num, logs) {
-                                console.log("Epoch: " + num);
-                                console.log(logs);
+    function train(xs, ys) {
+        return __awaiter(this, void 0, void 0, function () {
+            var options;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        options = {
+                            epochs: epochs,
+                            validationSplit: validationSplit,
+                            shuffle: true,
+                            callbacks: {
+                                onTrainBegin: function onTrainBegin() {
+                                    return console.log("training start");
+                                },
+                                onTrainEnd: function onTrainEnd() {
+                                    return console.log("training complete");
+                                },
+                                onEpochEnd: function onEpochEnd(num, logs) {
+                                    console.log("Epoch: " + num);
+                                    console.log(logs);
+                                }
                             }
-                        }
-                    };
-                    return [4, model.fit(xs, ys, options)];
-                case 1:
-                    return [2, _a.sent()];
-            }
+                        };
+                        return [4, model.fit(xs, ys, options)];
+                    case 1:
+                        return [2, _a.sent()];
+                }
+            });
         });
-    });
-}
-function makeInputs() {
-    var features = [];
-    for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
-        var singleSong = data_1[_i];
-        for (var _a = 0, _b = data[singleSong]; _a < _b.length; _a++) {
-            var singleFeature = _b[_a];
-            console.log(data[singleSong][singleFeature]);
+    }
+    function makeInputs() {
+        var features = [];
+        for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
+            var singleSong = data_1[_i];
+            for (var _a = 0, _b = data[singleSong]; _a < _b.length; _a++) {
+                var singleFeature = _b[_a];
+                console.log(data[singleSong][singleFeature]);
+            }
         }
     }
-}
-function loadJSON(url) {
-    return new Promise(function (resolve, reject) {
-        var xobj = new XMLHttpRequest();
-        xobj.overrideMimeType("application/json");
-        xobj.open('GET', url, true);
-        xobj.onreadystatechange = function () {
-            if (xobj.readyState == 4 && xobj.status == 200) {
-                resolve(xobj.responseText);
-            }
-        };
-        xobj.send(null);
-        xobj.onerror = function () {
-            return reject(xobj.statusText);
-        };
-    });
+    function loadJSON(url) {
+        return new Promise(function (resolve, reject) {
+            var xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', url, true);
+            xobj.onreadystatechange = function () {
+                if (xobj.readyState == 4 && xobj.status == 200) {
+                    resolve(xobj.responseText);
+                }
+            };
+            xobj.send(null);
+            xobj.onerror = function () {
+                return reject(xobj.statusText);
+            };
+        });
+    }
 }
 },{"../data/Emotion_data.json":"data\\Emotion_data.json","../toClassify/Emotion_features.json":"toClassify\\Emotion_features.json","./ShapeData":"scripts\\ShapeData.ts"}],"node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];

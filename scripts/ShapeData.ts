@@ -59,6 +59,13 @@ export class ShapeData {
         "frame_var"
     ]; // all sound features, inputs
 
+    // I want to be able to ignore certain features, like total_beats, because it could be irrelevant
+    // But for now it makes a mess with the arrays, so don't use it
+    featuresToIgnore = [
+        // "total_beats",
+        // "chroma_stft_std"
+    ];
+
 
     makeDatasetForTensors(data: object): Array<Array<any>> {
         let dataInputs = [];
@@ -70,17 +77,21 @@ export class ShapeData {
             dataInputs.push(input);
             dataOutputs.push(output);
         }
+
+        dataInputs = this.removeFeatures(dataInputs);
+
         return [
             dataInputs,
             dataOutputs
         ];
     };
 
-    makeUnclassifiedSongsForTensors(songsToClassify: object) {
+    makeUnclassifiedSongsForTensors(originalData, songsToClassify: object) {
         let enumFeatures = this.convertObjectToArray(songsToClassify);
         let numberOfSongs = Object.keys(enumFeatures[0]).length;
         let songNames = [];
         let allFeatures = [];
+
         for (let i=1; i<numberOfSongs+1; i++) {
             let songName = "";
             let singleSongFeatures = [];
@@ -95,10 +106,32 @@ export class ShapeData {
             allFeatures.push(singleSongFeatures);
         }
 
+        // console.log("norm", this.normalizeData(originalData, allFeatures));
+
+        allFeatures = this.removeFeatures(allFeatures);
+
+        // We return the normalized features
         return [
             songNames,
-            allFeatures
+            this.normalizeData(originalData, allFeatures)
         ];
+    }
+
+    getInputDim(): number {
+        return this.featuresList.length - this.featuresToIgnore.length;
+    }
+
+    removeFeatures(features: Array<Array<number>>): Array<Array<number>> {
+
+        for (const song in features) {
+            // console.log(features[song]);
+            for (let f=0; f<this.featuresToIgnore.length; f++) {
+                let featureIndex = this.featuresList.indexOf(this.featuresToIgnore[f]);
+                features[song].splice(featureIndex, 1);
+            }
+        }
+
+        return features;
     }
 
     convertObjectToArray(data: object): Array<Array<any>> {
@@ -127,36 +160,42 @@ export class ShapeData {
 
     normalizeData(originalData: object, arrayLikeData: object): Array<Array<number>> {
 
-        // console.log(originalData);
+        // console.log(`originaldata: `, originalData);
+        // console.log(`arraylikedata: `, arrayLikeData);
 
         let normalizedData = [];
-        // Normalize data to a 0-1 range
 
-        // We get the range for each feature
-        // It returns an object like that:
-        // 0: {
-        //     feature: "tempo",
-        //         min: 53.83300781,
-        //         max: 198.7680288
-        // }
-        // ...
+
         let featuresRange = this.getMinMaxValues(originalData);
         // console.log(featuresRange);
 
         for (const song in arrayLikeData) {
             let singleNormalizedData = [];
             for (let i=0; i<arrayLikeData[song].length; i++) {
+                // console.log(`featuresRange[i]`, featuresRange[i].feature);
                 let norm = this.normalize(arrayLikeData[song][i], featuresRange[i].min, featuresRange[i].max);
+                // console.log(norm);
                 singleNormalizedData.push(norm);
             }
             normalizedData.push(singleNormalizedData);
         }
+
+        // for (const song in arrayLikeData) {
+        //     let singleNormalizedData = [];
+        //     for (let i=0; i<arrayLikeData[song].length; i++) {
+        //         let norm = this.normalize(arrayLikeData[song][i], featuresRange[i].min, featuresRange[i].max);
+        //         console.log(norm);
+        //         singleNormalizedData.push(norm);
+        //     }
+        //     normalizedData.push(singleNormalizedData);
+        // }
         return normalizedData;
 
 
     };
 
     normalize(value: number, minValue: number, maxValue: number): number {
+        // console.log(`value: ${value}`, `minValue: ${minValue}`, `maxValue: ${maxValue}`, `result: ${(value-minValue)/(maxValue-minValue)}`)
         return (value-minValue)/(maxValue-minValue);
     }
 
@@ -192,6 +231,7 @@ export class ShapeData {
             });
         }
 
+        // console.log(`featuresMinMax:`, featuresMinMax)
         return featuresMinMax;
 
     }

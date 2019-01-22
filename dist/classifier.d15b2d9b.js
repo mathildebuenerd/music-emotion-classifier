@@ -114,6 +114,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ShapeData = function () {
     function ShapeData() {
         this.featuresList = ["tempo", "total_beats", "average_beats", "chroma_stft_mean", "chroma_stft_std", "chroma_stft_var", "chroma_cq_mean", "chroma_cq_std", "chroma_cq_var", "chroma_cens_mean", "chroma_cens_std", "chroma_cens_var", "melspectrogram_mean", "melspectrogram_std", "melspectrogram_var", "mfcc_mean", "mfcc_std", "mfcc_var", "mfcc_delta_mean", "mfcc_delta_std", "mfcc_delta_var", "rmse_mean", "rmse_std", "rmse_var", "cent_mean", "cent_std", "cent_var", "spec_bw_mean", "spec_bw_std", "spec_bw_var", "contrast_mean", "contrast_std", "contrast_var", "rolloff_mean", "rolloff_std", "rolloff_var", "poly_mean", "poly_std", "poly_var", "tonnetz_mean", "tonnetz_std", "tonnetz_var", "zcr_mean", "zcr_std", "zcr_var", "harm_mean", "harm_std", "harm_var", "perc_mean", "perc_std", "perc_var", "frame_mean", "frame_std", "frame_var"];
+        this.featuresToIgnore = [];
     }
     ShapeData.prototype.makeDatasetForTensors = function (data) {
         var dataInputs = [];
@@ -125,10 +126,11 @@ var ShapeData = function () {
             dataInputs.push(input);
             dataOutputs.push(output);
         }
+        dataInputs = this.removeFeatures(dataInputs);
         return [dataInputs, dataOutputs];
     };
     ;
-    ShapeData.prototype.makeUnclassifiedSongsForTensors = function (songsToClassify) {
+    ShapeData.prototype.makeUnclassifiedSongsForTensors = function (originalData, songsToClassify) {
         var enumFeatures = this.convertObjectToArray(songsToClassify);
         var numberOfSongs = Object.keys(enumFeatures[0]).length;
         var songNames = [];
@@ -146,7 +148,20 @@ var ShapeData = function () {
             songNames.push(songName);
             allFeatures.push(singleSongFeatures);
         }
-        return [songNames, allFeatures];
+        allFeatures = this.removeFeatures(allFeatures);
+        return [songNames, this.normalizeData(originalData, allFeatures)];
+    };
+    ShapeData.prototype.getInputDim = function () {
+        return this.featuresList.length - this.featuresToIgnore.length;
+    };
+    ShapeData.prototype.removeFeatures = function (features) {
+        for (var song in features) {
+            for (var f = 0; f < this.featuresToIgnore.length; f++) {
+                var featureIndex = this.featuresList.indexOf(this.featuresToIgnore[f]);
+                features[song].splice(featureIndex, 1);
+            }
+        }
+        return features;
     };
     ShapeData.prototype.convertObjectToArray = function (data) {
         var newArray = [];
@@ -316,6 +331,12 @@ var __importStar = this && this.__importStar || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var epochs = 30;
+var learningRate = 0.3;
+var validationSplit = 0.2;
+var unitsHiddenLayer = 50;
+var hiddenLayerActivation = "relu";
+var outputLayerActivation = "softmax";
 var dataset = __importStar(require("../data/Emotion_data.json"));
 var toClassify = __importStar(require("../toClassify/Emotion_features.json"));
 var SD = __importStar(require("./ShapeData"));
@@ -334,7 +355,7 @@ function setup() {
         return loadJSON(toClassify.default);
     }).then(function (jsonSongs) {
         songsToClassify = JSON.parse(jsonSongs);
-        var toClassify = ShapeData.makeUnclassifiedSongsForTensors(songsToClassify);
+        var toClassify = ShapeData.makeUnclassifiedSongsForTensors(data, songsToClassify);
         var songNames = toClassify[0];
         var songFeatures = toClassify[1];
         var newData = ShapeData.makeDatasetForTensors(data);
@@ -348,32 +369,38 @@ function setup() {
         var labelsTensor = tf.tensor1d(labels, "int32");
         var ys = tf.oneHot(labelsTensor, labelList.length);
         labelsTensor.dispose();
+        var inputDim = ShapeData.getInputDim();
         model = tf.sequential();
         var hiddenLayer = tf.layers.dense({
-            units: 32,
-            activation: "sigmoid",
-            inputDim: 54
+            units: unitsHiddenLayer,
+            activation: hiddenLayerActivation,
+            inputDim: inputDim
         });
         var outputLayer = tf.layers.dense({
             units: 4,
-            activation: "softmax"
+            activation: outputLayerActivation
         });
         model.add(hiddenLayer);
         model.add(outputLayer);
-        var learningRate = 0.02;
-        var myOptimizer = tf.train.sgd(learningRate);
+        var learningR = learningRate;
+        var myOptimizer = tf.train.sgd(learningR);
         model.compile({
             optimizer: myOptimizer,
-            loss: "categoricalCrossentropy"
+            loss: "categoricalCrossentropy",
+            metrics: ["accuracy"]
         });
         train(xs, ys).then(function (result) {
-            var indexToGuess = 4;
-            var toGuess = tf.tensor2d([songFeatures[indexToGuess]]);
-            var results = model.predict(toGuess);
-            var index = results.argMax(1).dataSync()[0];
-            var label = labelList[index];
-            console.log(songNames[indexToGuess]);
-            console.log(label);
+            tf.tidy(function () {
+                for (var song in songFeatures) {
+                    var toGuess = tf.tensor2d([songFeatures[song]]);
+                    var results = model.predict(toGuess);
+                    var argMax = results.argMax(1);
+                    var index = argMax.dataSync()[0];
+                    var label = labelList[index];
+                    model.getWeights();
+                    console.log("I think that " + songNames[song] + " is a " + label + " song");
+                }
+            });
         });
     }).catch(function (err) {
         return console.log(err);
@@ -386,8 +413,8 @@ function train(xs, ys) {
             switch (_a.label) {
                 case 0:
                     options = {
-                        epochs: 100,
-                        validationSplit: 0.1,
+                        epochs: epochs,
+                        validationSplit: validationSplit,
                         shuffle: true,
                         callbacks: {
                             onTrainBegin: function onTrainBegin() {
@@ -464,7 +491,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '58940' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '60416' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 

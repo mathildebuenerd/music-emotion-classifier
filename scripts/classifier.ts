@@ -1,5 +1,14 @@
 'use strict';
 
+// -------- Options --------
+const epochs = 30;
+const learningRate = 0.3;
+const validationSplit = 0.2;
+const unitsHiddenLayer = 50;
+const hiddenLayerActivation = "relu";
+const outputLayerActivation = "softmax";
+
+
 // Import data
 import * as dataset from "../data/Emotion_data.json";
 import * as toClassify from "../toClassify/Emotion_features.json";
@@ -8,12 +17,12 @@ import * as toClassify from "../toClassify/Emotion_features.json";
 import * as SD from "./ShapeData";
 const ShapeData = new SD.ShapeData;
 
-
 // const Classifier = (p) => {
 let data = {};
 let songsToClassify = {};
 let dataInputs = []; // The output of dataInputs[0] is dataOutputs[0]
 let labelList = ["sad", "happy", "relax", "angry"];
+
 let labels = []; // hot encoded values 0, 1, 2 or 3
 let normalizedData = [];
 
@@ -23,24 +32,15 @@ setup();
 
 function setup(): void {
 
-    loadJSON(dataset.default) // We have to use .default to load the url correctly with parcel
+    // We have to use .default to load the url correctly with parcel
+    loadJSON(dataset.default)
         .then((jsonDataset) => {
             data = JSON.parse(jsonDataset);
-            // let test = isIterable(data);
-            // console.log(test);
-
-
-
-
-            // console.log(xs.shape);
-            // console.log(xs);
-            // console.log(labels)
-            // makeInputs();
             return loadJSON(toClassify.default);
         })
         .then((jsonSongs) => {
             songsToClassify = JSON.parse(jsonSongs);
-            let toClassify = ShapeData.makeUnclassifiedSongsForTensors(songsToClassify);
+            let toClassify = ShapeData.makeUnclassifiedSongsForTensors(data, songsToClassify);
             let songNames = toClassify[0];
             let songFeatures = toClassify[1];
             // console.log(songFeatures[0]);
@@ -53,52 +53,70 @@ function setup(): void {
             let dataOutputs = newData[1]; // the outputs are "relax", "calm"...
 
             for (let i=0; i<dataOutputs.length; i++) {
-                labels.push(labelList.indexOf(dataOutputs[i][0])); // in the label list we put the hot encoded values like 0, 1, 2 or 3
+                // in the label list we put the hot encoded values like 0, 1, 2 or 3
+                labels.push(labelList.indexOf(dataOutputs[i][0]));
             }
 
+            // Transform the value of each feature into a 0 to 1 range
             normalizedData = ShapeData.normalizeData(data, dataInputs);
-
+            // console.log(normalizedData);
 
             let xs = tf.tensor2d(normalizedData);
             let labelsTensor = tf.tensor1d(labels, "int32"); // makes a tensor with the labels
             let ys = tf.oneHot(labelsTensor, labelList.length); // defines the outputs
             labelsTensor.dispose(); // for memory management, as we don't need anymore, we use dispose()
-            // console.log(xs.shape);
-            // console.log(ys.shape);
-            // xs.print();
-            // ys.print();
+
+            let inputDim = ShapeData.getInputDim();
 
             model = tf.sequential();
             let hiddenLayer = tf.layers.dense({
-                units: 32,
-                activation: "sigmoid",
-                inputDim: 54
+                units: unitsHiddenLayer,
+                activation: hiddenLayerActivation,
+                inputDim: inputDim
             });
             let outputLayer = tf.layers.dense({
                 units: 4,
-                activation: "softmax"
+                activation: outputLayerActivation
             });
             model.add(hiddenLayer);
             model.add(outputLayer);
 
             // Create an optimizer
-            const learningRate = 0.02;
-            const myOptimizer = tf.train.sgd(learningRate);
+            const learningR = learningRate;
+            const myOptimizer = tf.train.sgd(learningR);
 
             model.compile({
                 optimizer: myOptimizer,
-                loss: "categoricalCrossentropy"
+                loss: "categoricalCrossentropy",
+                metrics: ["accuracy"]
             });
 
             train(xs, ys).then( (result) => {
                 // console.log(result);
-                const indexToGuess = 4;
-                const toGuess = tf.tensor2d([songFeatures[indexToGuess]]);
-                let results = model.predict(toGuess);
-                let index = results.argMax(1).dataSync()[0];
-                let label = labelList[index];
-                console.log(songNames[indexToGuess]);
-                console.log(label);
+                tf.tidy( () => {
+
+                    for (const song in songFeatures) {
+                        // toGuess = input
+                        const toGuess = tf.tensor2d([songFeatures[song]]);
+                        // console.log(`song features:`, songFeatures[song]);
+                        let results = model.predict(toGuess);
+                        let argMax = results.argMax(1);
+                        let index = argMax.dataSync()[0];
+                        let label = labelList[index];
+                        model.getWeights();
+                        console.log(`I think that ${songNames[song]} is a ${label} song`);
+                    }
+
+                    // const indexToGuess = 4;
+                    // const toGuess = tf.tensor2d([songFeatures[indexToGuess]]);
+                    // let results = model.predict(toGuess);
+                    // let index = results.argMax(1).dataSync()[0];
+                    // let label = labelList[index];
+                    // model.getWeights();
+                    // console.log(songNames[indexToGuess]);
+                    // console.log(label);
+                });
+
             });
 
 
@@ -111,8 +129,8 @@ function setup(): void {
 async function train(xs, ys) {
 
     const options = {
-        epochs: 100, // number of times it iterates over training data
-        validationSplit: 0.1,
+        epochs: epochs, // number of times it iterates over training data
+        validationSplit: validationSplit,
         shuffle: true,
         callbacks: {
             onTrainBegin: () => console.log("training start"),

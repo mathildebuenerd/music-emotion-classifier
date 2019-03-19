@@ -5,7 +5,7 @@ Classifies musics and sounds into 4 emotions: happy, calm, angry or sad, dependi
 
 The classification is based on [a dataset of already classified sounds](https://github.com/danz1ka19/Music-Emotion-Recognition/blob/master/Emotion_features.csv) by danz1ka19.
 
-![Vue de l'interface](https://i.ibb.co/cTb5gZg/Screenshot-2019-01-22-Music-Emotion-Classifier.png)
+![Vue de l'interface](preview.png)
 
 ## Usage
 

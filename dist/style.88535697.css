@@ -1,0 +1,153 @@
+body {
+    margin: 0;
+    padding: 30px 50px;
+    font-family: Roboto, arial, sans-serif;
+    background-color: #efefef;
+}
+
+#allOptions {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    #allOptions {
+        flex-direction: column;
+    }
+
+    .inputData {
+        width: 80% !important;
+    }
+}
+.inputData {
+    background-color: white;
+    padding: 15px 15px 0;
+    margin-bottom: 20px;
+    margin-right: 20px;
+    width: 25%;
+    box-shadow: 0 3px 5px #c4c4c4;
+}
+
+#allOptions input {
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid lightgrey;
+    width: 80%;
+}
+
+button {
+    padding: 15px;
+    margin-top: 25px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background-color: #0085ff;
+    color: white;
+    border: 0;
+    box-shadow: 0 3px 5px #c4c4c4;
+}
+
+label {
+    font-weight: 700;
+}
+
+.defaultValue {
+    font-size: 0.9em;
+    font-style: italic;
+    color: #aaa;
+}
+.range::before {
+    content: "Value should be...";
+}
+
+.checkboxConsole {
+    margin-bottom: 25px;
+}
+
+/*
+    Custom checkboxes in CSS3
+    https://www.creativejuiz.fr/trytotry/custom-checkbox-full-css3-flat-ui.html
+*/
+
+[type="checkbox"]:not(:checked),
+[type="checkbox"]:checked {
+    position: absolute;
+    left: -9999px;
+}
+[type="checkbox"]:not(:checked) + label,
+[type="checkbox"]:checked + label {
+    position: relative;
+    padding-left: 75px;
+    cursor: pointer;
+}
+[type="checkbox"]:not(:checked) + label:before,
+[type="checkbox"]:checked + label:before,
+[type="checkbox"]:not(:checked) + label:after,
+[type="checkbox"]:checked + label:after {
+    content: '';
+    position: absolute;
+}
+[type="checkbox"]:not(:checked) + label:before,
+[type="checkbox"]:checked + label:before {
+    left:0; top: -3px;
+    width: 65px; height: 30px;
+    background: #DDDDDD;
+    border-radius: 15px;
+    -webkit-transition: background-color .2s;
+    -moz-transition: background-color .2s;
+    -ms-transition: background-color .2s;
+    transition: background-color .2s;
+}
+[type="checkbox"]:not(:checked) + label:after,
+[type="checkbox"]:checked + label:after {
+    width: 20px; height: 20px;
+    -webkit-transition: all .2s;
+    -moz-transition: all .2s;
+    -ms-transition: all .2s;
+    transition: all .2s;
+    border-radius: 50%;
+    background: #7F8C9A;
+    top: 2px; left: 5px;
+}
+
+/* on checked */
+[type="checkbox"]:checked + label:before {
+    background: #0085ff;
+}
+[type="checkbox"]:checked + label:after {
+    background: #fff;
+    top: 2px; left: 40px;
+}
+
+[type="checkbox"]:checked + label .ui,
+[type="checkbox"]:not(:checked) + label .ui:before,
+[type="checkbox"]:checked + label .ui:after {
+    position: absolute;
+    left: 6px;
+    width: 65px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 22px;
+    -webkit-transition: all .2s;
+    -moz-transition: all .2s;
+    -ms-transition: all .2s;
+    transition: all .2s;
+}
+[type="checkbox"]:not(:checked) + label .ui:before {
+    content: "no";
+    left: 32px
+}
+[type="checkbox"]:checked + label .ui:after {
+    content: "yes";
+    color: white;
+}
+[type="checkbox"]:focus + label:before {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-top: -1px;
+}
+
+
+

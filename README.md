@@ -35,5 +35,8 @@ py Feature-Extraction.py
 - The results will appear in the console.
 
 
-## Sources
+### Credits
+
+Development by Mathilde Buenerd.
+
 Based on [this dataset and feature extractor](https://github.com/danz1ka19/Music-Emotion-Recognition) by danz1ka19.
